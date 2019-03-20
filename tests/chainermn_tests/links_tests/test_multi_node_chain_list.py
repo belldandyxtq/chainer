@@ -6,10 +6,12 @@ import chainermn
 import numpy as np
 import pytest
 
+
 class Param(object):
     def __init__(self, param):
         self.dtype = None
         self.__dict__.update(param)
+
 
 params = [Param(p) for p in [
     {
@@ -17,6 +19,7 @@ params = [Param(p) for p in [
     }, {
         'dtype': np.float32,
     }]]
+
 
 class Cycle0SubA(chainer.Chain):
     def __init__(self, size):
@@ -287,16 +290,16 @@ def check_crossing_model(gpu, param):
         else:
             model = L.Classifier(Cross1(
                 d, communicator, rank_next, rank_prev))
-    
+
         if gpu:
             model.to_gpu()
             X = chainer.cuda.to_gpu(X)
             Y = chainer.cuda.to_gpu(Y)
-    
+
         for i in range(n):
             err = model(X[i:i + 1], Y[i:i + 1])
             err.backward()
-    
+
 
 @pytest.mark.parametrize('param', params)
 @pytest.mark.filterwarnings('ignore::DeprecationWarning')
@@ -318,7 +321,6 @@ def check_branching_model(gpu, communicator, rank_next, rank_prev,
     Y = (np.random.rand(n) * 2).astype(np.int32)
 
     with chainer.using_config('dtype', param.dtype):
-        print("dtype is {}".format(param.dtype))
         if communicator.rank == 0:
             rank_children = [rank for rank in range(1, communicator.size)]
             model = L.Classifier(parent_model(
